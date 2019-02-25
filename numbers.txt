@@ -1,0 +1,129 @@
+hole_weight:	-1.0	average:	21.61	min:	14	max:	29
+hole_weight:	-0.9	average:	24.994	min:	15	max:	35
+hole_weight:	-0.8	average:	24.99	min:	16	max:	33
+hole_weight:	-0.7	average:	25.084	min:	16	max:	34
+hole_weight:	-0.6	average:	26.901	min:	16	max:	34
+hole_weight:	-0.5	average:	29.319	min:	19	max:	36
+hole_weight:	-0.4	average:	34.765	min:	23	max:	42
+hole_weight:	-0.3	average:	42.715	min:	35	max:	65
+hole_weight:	-0.2	average:	48.796	min:	38	max:	72
+hole_weight:	-0.1	average:	53.503	min:	39	max:	82
+hole_weight:	0.0	average:	81.134	min:	51	max:	129
+hole_weight:	0.1	average:	223.953	min:	82	max:	625
+hole_weight:	0.2	average:	226.434	min:	85	max:	705
+hole_weight:	0.3	average:	232.061	min:	81	max:	604
+hole_weight:	0.4	average:	241.959	min:	76	max:	620
+hole_weight:	0.5	average:	248.47	min:	42	max:	831
+hole_weight:	0.6	average:	253.594	min:	51	max:	706
+hole_weight:	0.7	average:	258.394	min:	49	max:	1043
+hole_weight:	0.8	average:	260.732	min:	55	max:	717
+hole_weight:	0.9	average:	257.917	min:	55	max:	726
+hole_weight:	1.0	average:	323.55	min:	48	max:	1137
+hole_weight:	1.1	average:	245.726	min:	37	max:	1105
+hole_weight:	1.2	average:	241.984	min:	31	max:	1164
+hole_weight:	1.3	average:	245.45	min:	37	max:	1458
+hole_weight:	1.4	average:	259.182	min:	37	max:	1579
+hole_weight:	1.5	average:	242.641	min:	42	max:	1119
+hole_weight:	1.6	average:	238.733	min:	37	max:	1631
+hole_weight:	1.7	average:	246.107	min:	36	max:	1297
+hole_weight:	1.8	average:	233.029	min:	35	max:	1416
+hole_weight:	1.9	average:	241.131	min:	40	max:	1121
+
+hole_weight:	0.9	jagged_weight:	0.0	average:	260.76	min:	47	max:	621
+hole_weight:	0.9	jagged_weight:	0.01	average:	462.04	min:	118	max:	1205
+hole_weight:	0.9	jagged_weight:	0.02	average:	515.98	min:	200	max:	1297
+hole_weight:	0.9	jagged_weight:	0.03	average:	518.69	min:	136	max:	1703
+hole_weight:	0.9	jagged_weight:	0.04	average:	489.47	min:	81	max:	1234
+hole_weight:	0.9	jagged_weight:	0.05	average:	518.3	min:	100	max:	1334
+hole_weight:	0.9	jagged_weight:	0.06	average:	557.07	min:	95	max:	2009
+hole_weight:	0.9	jagged_weight:	0.07	average:	523.7	min:	178	max:	1340
+hole_weight:	0.9	jagged_weight:	0.08	average:	529.29	min:	90	max:	1236
+hole_weight:	0.9	jagged_weight:	0.09	average:	502.66	min:	165	max:	1499
+hole_weight:	0.9	jagged_weight:	0.1	average:	560.21	min:	164	max:	1401
+hole_weight:	0.9	jagged_weight:	0.11	average:	558.14	min:	133	max:	1511
+hole_weight:	0.9	jagged_weight:	0.12	average:	520.64	min:	119	max:	1469
+hole_weight:	0.9	jagged_weight:	0.13	average:	547.4	min:	170	max:	1897
+hole_weight:	0.9	jagged_weight:	0.14	average:	492.03	min:	162	max:	1149
+hole_weight:	0.9	jagged_weight:	0.15	average:	466.37	min:	167	max:	1392
+hole_weight:	0.9	jagged_weight:	0.16	average:	517.41	min:	161	max:	2071
+hole_weight:	0.9	jagged_weight:	0.17	average:	516.43	min:	161	max:	1543
+hole_weight:	0.9	jagged_weight:	0.18	average:	501.51	min:	198	max:	1365
+hole_weight:	0.9	jagged_weight:	0.19	average:	445.49	min:	156	max:	912
+hole_weight:	1.0	jagged_weight:	0.0	average:	315.84	min:	58	max:	1263
+hole_weight:	1.0	jagged_weight:	0.01	average:	626.22	min:	234	max:	2120
+hole_weight:	1.0	jagged_weight:	0.02	average:	673.48	min:	184	max:	1882
+hole_weight:	1.0	jagged_weight:	0.03	average:	715.61	min:	133	max:	2612
+hole_weight:	1.0	jagged_weight:	0.04	average:	712.12	min:	195	max:	2495
+hole_weight:	1.0	jagged_weight:	0.05	average:	658.85	min:	193	max:	1870
+hole_weight:	1.0	jagged_weight:	0.06	average:	642.18	min:	177	max:	1607
+hole_weight:	1.0	jagged_weight:	0.07	average:	700.65	min:	174	max:	3237
+hole_weight:	1.0	jagged_weight:	0.08	average:	681.95	min:	82	max:	1888
+hole_weight:	1.0	jagged_weight:	0.09	average:	640.94	min:	225	max:	3219
+hole_weight:	1.0	jagged_weight:	0.1	average:	618.41	min:	180	max:	2351
+hole_weight:	1.0	jagged_weight:	0.11	average:	675.99	min:	62	max:	1977
+hole_weight:	1.0	jagged_weight:	0.12	average:	622.49	min:	109	max:	1755
+hole_weight:	1.0	jagged_weight:	0.13	average:	641.55	min:	243	max:	2239
+hole_weight:	1.0	jagged_weight:	0.14	average:	582.54	min:	153	max:	1865
+hole_weight:	1.0	jagged_weight:	0.15	average:	665.14	min:	219	max:	2023
+hole_weight:	1.0	jagged_weight:	0.16	average:	667.76	min:	197	max:	1916
+hole_weight:	1.0	jagged_weight:	0.17	average:	528.29	min:	191	max:	1647
+hole_weight:	1.0	jagged_weight:	0.18	average:	538.06	min:	169	max:	2206
+hole_weight:	1.0	jagged_weight:	0.19	average:	556.64	min:	170	max:	1330
+hole_weight:	1.1	jagged_weight:	0.0	average:	225.88	min:	48	max:	797
+hole_weight:	1.1	jagged_weight:	0.01	average:	2196.07	min:	61	max:	9105
+hole_weight:	1.1	jagged_weight:	0.02	average:	7575.6	min:	265	max:	48206
+hole_weight:	1.1	jagged_weight:	0.03	average:	5628.34	min:	481	max:	25186
+hole_weight:	1.1	jagged_weight:	0.04	average:	2838.43	min:	77	max:	13776
+hole_weight:	1.1	jagged_weight:	0.05	average:	1465.09	min:	320	max:	6828
+hole_weight:	1.1	jagged_weight:	0.06	average:	993.41	min:	242	max:	3868
+hole_weight:	1.1	jagged_weight:	0.07	average:	1047.87	min:	184	max:	3043
+hole_weight:	1.1	jagged_weight:	0.08	average:	962.25	min:	196	max:	2948
+hole_weight:	1.1	jagged_weight:	0.09	average:	890.27	min:	58	max:	2923
+hole_weight:	1.1	jagged_weight:	0.1	average:	857.26	min:	197	max:	2507
+hole_weight:	1.1	jagged_weight:	0.11	average:	785.4	min:	181	max:	2510
+hole_weight:	1.1	jagged_weight:	0.12	average:	772.01	min:	217	max:	2065
+hole_weight:	1.1	jagged_weight:	0.13	average:	782.38	min:	181	max:	2394
+hole_weight:	1.1	jagged_weight:	0.14	average:	796.13	min:	250	max:	2017
+hole_weight:	1.1	jagged_weight:	0.15	average:	698.46	min:	89	max:	2293
+hole_weight:	1.1	jagged_weight:	0.16	average:	654.47	min:	192	max:	2096
+hole_weight:	1.1	jagged_weight:	0.17	average:	704.53	min:	149	max:	2462
+hole_weight:	1.1	jagged_weight:	0.18	average:	607.59	min:	206	max:	1802
+hole_weight:	1.1	jagged_weight:	0.19	average:	641.67	min:	146	max:	2203
+hole_weight:	1.04	jagged_weight:	0.01	average:	10402.5	min:	582	max:	42490
+hole_weight:	1.04	jagged_weight:	0.014	average:	2028.4	min:	340	max:	5184
+hole_weight:	1.04	jagged_weight:	0.018000000000000002	average:	2374.92	min:	278	max:	7076
+hole_weight:	1.04	jagged_weight:	0.022	average:	772.94	min:	201	max:	2086
+hole_weight:	1.04	jagged_weight:	0.026000000000000002	average:	901.78	min:	200	max:	2707
+hole_weight:	1.08	jagged_weight:	0.01	average:	3553.84	min:	102	max:	15282
+hole_weight:	1.08	jagged_weight:	0.014	average:	8641.56	min:	163	max:	43741
+hole_weight:	1.08	jagged_weight:	0.018000000000000002	average:	8940.08	min:	198	max:	42192
+hole_weight:	1.08	jagged_weight:	0.022	average:	5082.9	min:	283	max:	20668
+hole_weight:	1.08	jagged_weight:	0.026000000000000002	average:	5422.24	min:	254	max:	21290
+hole_weight:	1.12	jagged_weight:	0.01	average:	1985.6	min:	86	max:	11537
+hole_weight:	1.12	jagged_weight:	0.014	average:	2640.94	min:	116	max:	9501
+hole_weight:	1.12	jagged_weight:	0.018000000000000002	average:	4430.3	min:	138	max:	21686
+hole_weight:	1.12	jagged_weight:	0.022	average:	7390.14	min:	284	max:	28245
+hole_weight:	1.12	jagged_weight:	0.026000000000000002	average:	6410.9	min:	212	max:	20769
+hole_weight:	1.1600000000000001	jagged_weight:	0.01	average:	1528.76	min:	64	max:	8378
+hole_weight:	1.1600000000000001	jagged_weight:	0.014	average:	1846.72	min:	172	max:	8333
+hole_weight:	1.1600000000000001	jagged_weight:	0.018000000000000002	average:	2651.3	min:	136	max:	12426
+hole_weight:	1.1600000000000001	jagged_weight:	0.022	average:	4569.46	min:	238	max:	25730
+hole_weight: 1.03 jagged_weight: 0.005 average: 5392.6 min: 195 max: 27670
+hole_weight: 1.03 jagged_weight: 0.009000000000000001 average: 4827.54 min: 444 max: 23243
+hole_weight: 1.03 jagged_weight: 0.013000000000000001 average: 2005.8 min: 228 max: 6038
+hole_weight: 1.03 jagged_weight: 0.017 average: 899.6 min: 244 max: 2285
+hole_weight: 1.03 jagged_weight: 0.021 average: 949.6 min: 100 max: 3600
+hole_weight: 1.034 jagged_weight: 0.005 average: 3757.48 min: 137 max: 14282
+hole_weight: 1.034 jagged_weight: 0.009000000000000001 average: 5545.68 min: 209 max: 16523
+hole_weight: 1.034 jagged_weight: 0.013000000000000001 average: 2579.78 min: 185 max: 8754
+hole_weight: 1.034 jagged_weight: 0.017 average: 1149.76 min: 162 max: 3465
+hole_weight: 1.034 jagged_weight: 0.021 average: 946.82 min: 254 max: 3429
+hole_weight: 1.038 jagged_weight: 0.005 average: 3637.42 min: 73 max: 19721
+hole_weight: 1.038 jagged_weight: 0.009000000000000001 average: 11141.52 min: 413 max: 48048
+hole_weight: 1.038 jagged_weight: 0.013000000000000001 average: 2415.74 min: 377 max: 14072
+hole_weight: 1.038 jagged_weight: 0.017 average: 2446.08 min: 245 max: 9644
+hole_weight: 1.038 jagged_weight: 0.021 average: 1048.94 min: 168 max: 3079
+hole_weight: 1.042 jagged_weight: 0.005 average: 2775.14 min: 129 max: 8274
+hole_weight: 1.042 jagged_weight: 0.009000000000000001 average: 10450.36 min: 223 max: 37815
+hole_weight: 1.042 jagged_weight: 0.013000000000000001 average: 5099.8 min: 424 max: 22643
+hole_weight: 1.042 jagged_weight: 0.017 average: 2453.96 min: 133 max: 9897
