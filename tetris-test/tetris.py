@@ -1,10 +1,13 @@
-import pathos.pools as pp
 import random
+import sys
 import time
 
-pool = None
-
 MULTIPROCESSESED = False
+
+if MULTIPROCESSESED:
+	import pathos.pools as pp
+
+pool = None
 
 HOLE_WEIGHT = 1.034
 JAGGED_WEIGHT = 0.008
@@ -13,7 +16,7 @@ HEIGHT_POWER = 1.0
 HOLE_POWER = 1.0
 JAGGED_POWER = 1.0
 
-RECURSION_DEPTH = 2
+RECURSION_DEPTH = 0
 
 WELL_HEIGHT = 25
 WELL_WIDTH = 10
@@ -154,9 +157,6 @@ class GameState(object):
 		block_width = len(block[0])
 		block_height = len(block)
 
-		if block_width + x_offset > well_width:
-			return None
-
 		def find_highest_well_row():
 			highest_well_row = well_height
 			for x in range(block_width):
@@ -165,7 +165,8 @@ class GameState(object):
 					current_block_row -= 1
 
 				current_well_row = 0
-				while current_well_row < well_height and not self.well[current_well_row][x + x_offset]:
+				well_x = x + x_offset
+				while current_well_row < well_height and not self.well[current_well_row][well_x]:
 					current_well_row += 1
 
 				if current_well_row - current_block_row - 1 < highest_well_row:
@@ -221,11 +222,11 @@ class GameState(object):
 		if self.possible_futures is None:
 			self.possible_futures = []
 			block = self.next_up[0]
-			for offset in range(WELL_WIDTH):
-				for rotation in block.rotations:
+			for rotation in block.rotations:
+				block_width = len(rotation[0])
+				for offset in range(WELL_WIDTH - block_width + 1):
 					future_well = self.do_a_tetris_move(rotation, offset)
-					if future_well is not None:
-						self.possible_futures.append(GameState(future_well, self.hold, self.next_up[1:]))
+					self.possible_futures.append(GameState(future_well, self.hold, self.next_up[1:]))
 			if not self.was_held:
 				if self.hold is None:
 					self.possible_futures.append(GameState(self.well, block, self.next_up[1:], was_held=True))
@@ -247,7 +248,7 @@ def main():
 	iterations_run = 0
 	block_counts = []
 	last_time = time.time()
-	for _ in range(200):
+	for _ in range(100):
 		well = [[0] * WELL_WIDTH] * WELL_HEIGHT
 		hold = None
 		next_up = blocks[:]
@@ -260,10 +261,10 @@ def main():
 
 			# print("next up:")
 			# for next in state.next_up[1:4]:
-			# 	print_well(next)
+			# 	print_well(next.grid)
 			# if best_future.hold is not None:
 			# 	print("hold:")
-			# 	print_well(best_future.hold)
+			# 	print_well(best_future.hold.grid)
 			# print_well(best_future.well)
 			# print("best future", best_future.get_fitness())
 			#
@@ -273,7 +274,7 @@ def main():
 			state = best_future
 
 			block_count += 1
-			if block_count % 100 == 0:
+			if block_count % 1000 == 0:
 				print("block count:", block_count)
 				print("time:", time.time() - last_time)
 				last_time = time.time()
@@ -284,12 +285,17 @@ def main():
 	print("hole_weight:", HOLE_WEIGHT, "jagged_weight:", JAGGED_WEIGHT, "average:",
 	      sum(block_counts) / len(block_counts),
 	      "min:", min(block_counts), "max:", max(block_counts))
+	return sum(block_counts) / len(block_counts)
 
 
 if __name__ == "__main__":
+	if len(sys.argv) > 1:
+		HOLE_WEIGHT = float(sys.argv[1])
+		JAGGED_WEIGHT = float(sys.argv[2])
+
 	if MULTIPROCESSESED:
 		with pp.ProcessPool(processes=8) as p:
 			pool = p
 			main()
 	else:
-		main()
+		print(main())
