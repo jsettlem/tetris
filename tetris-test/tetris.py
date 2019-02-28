@@ -1,5 +1,10 @@
+import pathos.pools as pp
 import random
 import time
+
+pool = None
+
+MULTIPROCESSESED = False
 
 HOLE_WEIGHT = 1.034
 JAGGED_WEIGHT = 0.008
@@ -8,7 +13,7 @@ HEIGHT_POWER = 1.0
 HOLE_POWER = 1.0
 JAGGED_POWER = 1.0
 
-RECURSION_DEPTH = 1
+RECURSION_DEPTH = 2
 
 WELL_HEIGHT = 25
 WELL_WIDTH = 10
@@ -18,44 +23,68 @@ block_chars = ['\x1b[%sm  \x1b[0m' % ';'.join(["1", "30", str(bg)]) for bg in ra
 fitness_cache = {}
 well_cache = {}
 
-iBlock = [
+
+class Block(object):
+	def __init__(self, grid, rotations):
+		self.grid = grid
+		self.rotations = []
+		for rotation in rotations:
+			if rotation == 1:
+				self.rotations.append(self.rotate_right(self.grid))
+			elif rotation == 2:
+				self.rotations.append(self.rotate_right(self.rotate_right(self.grid)))
+			elif rotation == -1:
+				self.rotations.append(self.rotate_left(self.grid))
+			else:
+				self.rotations.append(self.grid)
+
+	@staticmethod
+	def rotate_right(grid):
+		return list(zip(*grid[::-1]))
+
+	@staticmethod
+	def rotate_left(grid):
+		return list(zip(*grid))[::-1]
+
+
+iBlock = Block([
 	[1],
 	[1],
 	[1],
 	[1]
-]
+], (0, 1))
 
-jBlock = [
+jBlock = Block([
 	[0, 2],
 	[0, 2],
 	[2, 2]
-]
+], (0, 1, 2, -1))
 
-lBlock = [
+lBlock = Block([
 	[3, 0],
 	[3, 0],
 	[3, 3]
-]
+], (0, 1, 2, -1))
 
-zBlock = [
+zBlock = Block([
 	[4, 4, 0],
 	[0, 4, 4]
-]
+], (0, 1))
 
-sBlock = [
+sBlock = Block([
 	[0, 5, 5],
 	[5, 5, 0]
-]
+], (0, 1))
 
-tBlock = [
+tBlock = Block([
 	[0, 6, 0],
 	[6, 6, 6]
-]
+], (0, 1, 2, -1))
 
-oBlock = [
+oBlock = Block([
 	[7, 7],
 	[7, 7]
-]
+], (0,))
 
 blocks = [iBlock, jBlock, lBlock, zBlock, sBlock, tBlock, oBlock]
 random.shuffle(blocks)
@@ -73,7 +102,14 @@ class GameState(object):
 		self.hold = hold
 		self.next_up = next_up
 		self.was_held = was_held
+		if len(self.next_up) < len(blocks):
+			self.next_up += blocks
+			self.was_shuffled = True
+		else:
+			self.was_shuffled = False
+		self.possible_futures = None
 		self.fitness = None
+		self.alive = self.is_alive()
 
 	def get_fitness(self):
 		if self.fitness is None:
@@ -81,7 +117,7 @@ class GameState(object):
 		return self.fitness
 
 	def calculate_fitness(self):
-		if not self.is_alive():
+		if not self.alive:
 			return 9999999
 
 		row_fitness = 0
@@ -103,31 +139,20 @@ class GameState(object):
 				if self.well[y][column] == 0:
 					hole_fitness += 1
 				y += 1
-		total_fitness = row_fitness ** HEIGHT_POWER * 1.0 + hole_fitness ** HOLE_POWER * HOLE_WEIGHT + jagged_fitness ** JAGGED_POWER * JAGGED_WEIGHT
+		total_fitness = row_fitness + hole_fitness * HOLE_WEIGHT + jagged_fitness * JAGGED_WEIGHT
 		return total_fitness
 
 	def is_alive(self):
-		return sum(self.well[0]) == 0
+		for cell in self.well[0]:
+			if cell:
+				return False
+		return True
 
-	def update_well_with_block(self, block, rotate, x_offset):
-		def rotate_right(grid):
-			return list(zip(*grid[::-1]))
-
-		def rotate_left(grid):
-			return list(zip(*grid))[::-1]
-
-		if rotate == 1:
-			new_block = rotate_right(block)
-		elif rotate == 2:
-			new_block = rotate_right(rotate_right(block))
-		elif rotate == -1:
-			new_block = rotate_left(block)
-		else:
-			new_block = block
+	def do_a_tetris_move(self, block, x_offset):
 		well_width = len(self.well[0])
 		well_height = len(self.well)
-		block_width = len(new_block[0])
-		block_height = len(new_block)
+		block_width = len(block[0])
+		block_height = len(block)
 
 		if block_width + x_offset > well_width:
 			return None
@@ -136,7 +161,7 @@ class GameState(object):
 			highest_well_row = well_height
 			for x in range(block_width):
 				current_block_row = block_height - 1
-				while not new_block[current_block_row][x]:
+				while not block[current_block_row][x]:
 					current_block_row -= 1
 
 				current_well_row = 0
@@ -164,15 +189,26 @@ class GameState(object):
 		def insert_block_rows(new_well, y):
 			new_well.append([])
 			to_clear = True
-			for x in range(well_width):
+			block_y = y - y_offset
+			for x in range(0, x_offset):
+				new_well[y].append(self.well[y][x])
+				if to_clear and new_well[y][x] == 0:
+					to_clear = False
+
+			for x in range(max(0, x_offset), x_offset + block_width):
 				block_x = x - x_offset
-				block_y = y - y_offset
-				if 0 <= block_x < block_width and new_block[block_y][block_x]:
-					new_well[y].append(new_block[block_y][block_x])
+				if block[block_y][block_x]:
+					new_well[y].append(block[block_y][block_x])
 				else:
 					new_well[y].append(self.well[y][x])
 					if to_clear and new_well[y][x] == 0:
 						to_clear = False
+
+			for x in range(x_offset + block_width, well_width):
+				new_well[y].append(self.well[y][x])
+				if to_clear and new_well[y][x] == 0:
+					to_clear = False
+
 			if to_clear:
 				del new_well[y]
 				new_well.insert(0, [0 for _ in range(well_width)])
@@ -181,48 +217,46 @@ class GameState(object):
 
 		return insert_block_into_well()
 
-
-def find_max_fitness(state, recurse=0):
-	possible_futures = []
-	well = state.well
-	blocks = state.next_up
-	hold = state.hold
-	block = blocks[0]
-	for offset in range(WELL_WIDTH):
-		for rotation in (0, 1, -1, 2):
-			if rotation == -1 and block in (iBlock, zBlock, sBlock):
-				break
-			elif block is oBlock and rotation != 0:
-				break
-			future_state = GameState(state.update_well_with_block(block, rotation, offset), hold, blocks[1:])
-			if future_state.well is not None:
-				possible_futures.append(future_state)
-	if not state.was_held:
-		if hold is None:
-			possible_futures.append(GameState(well, block, blocks[1:], was_held=True))
+	def find_max_fitness(self, recurse=RECURSION_DEPTH):
+		if self.possible_futures is None:
+			self.possible_futures = []
+			block = self.next_up[0]
+			for offset in range(WELL_WIDTH):
+				for rotation in block.rotations:
+					future_well = self.do_a_tetris_move(rotation, offset)
+					if future_well is not None:
+						self.possible_futures.append(GameState(future_well, self.hold, self.next_up[1:]))
+			if not self.was_held:
+				if self.hold is None:
+					self.possible_futures.append(GameState(self.well, block, self.next_up[1:], was_held=True))
+				else:
+					self.possible_futures.append(
+						GameState(self.well, block, [self.hold] + self.next_up[1:], was_held=True))
+		if MULTIPROCESSESED and recurse == RECURSION_DEPTH:
+			future_fitnesses = pool.map(lambda future: future.find_max_fitness(recurse - 1).get_fitness(),
+			                            self.possible_futures)
+			max_index = future_fitnesses.index(min(future_fitnesses))
+			return self.possible_futures[max_index]
+		elif recurse:
+			return min(self.possible_futures, key=lambda future: future.find_max_fitness(recurse - 1).get_fitness())
 		else:
-			possible_futures.append(GameState(well, block, [hold] + blocks[1:], was_held=True))
-	if recurse:
-		return min(possible_futures,
-		           key=lambda future: find_max_fitness(future, recurse - 1).get_fitness())
-	else:
-		return min(possible_futures, key=lambda future: future.get_fitness())
+			return min(self.possible_futures, key=lambda future: future.get_fitness())
 
 
 def main():
 	iterations_run = 0
 	block_counts = []
+	last_time = time.time()
 	for _ in range(200):
 		well = [[0] * WELL_WIDTH] * WELL_HEIGHT
 		hold = None
 		next_up = blocks[:]
 		state = GameState(well, hold, next_up)
 		block_count = 0
-		while state.is_alive():
-			if len(state.next_up) < len(blocks):
+		while state.alive:
+			best_future = state.find_max_fitness()
+			if best_future.was_shuffled:
 				random.shuffle(blocks)
-				state.next_up += blocks
-			best_future = find_max_fitness(state, recurse=RECURSION_DEPTH)
 
 			# print("next up:")
 			# for next in state.next_up[1:4]:
@@ -239,8 +273,10 @@ def main():
 			state = best_future
 
 			block_count += 1
-			if block_count % 1000 == 0:
+			if block_count % 100 == 0:
 				print("block count:", block_count)
+				print("time:", time.time() - last_time)
+				last_time = time.time()
 		iterations_run += 1
 		block_counts.append(block_count)
 		print("well died :( block_count:", block_count, "iterations run:", iterations_run)
@@ -251,4 +287,9 @@ def main():
 
 
 if __name__ == "__main__":
-	main()
+	if MULTIPROCESSESED:
+		with pp.ProcessPool(processes=8) as p:
+			pool = p
+			main()
+	else:
+		main()
