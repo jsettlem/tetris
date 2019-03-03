@@ -29,10 +29,12 @@ def objective(params):
 
 trials = MongoTrials('mongo://localhost:1234/testdb_2/jobs')
 
-best = fmin(fn=wrapper,
-            space={"hole": hp.uniform('hole', 0.9, 2), "jag": hp.uniform('jag', 0, 0.05)},
-            algo=tpe.suggest,
-            max_evals=1000,
-            trials=trials)
+# best = fmin(fn=wrapper,
+#             space={"hole": hp.uniform('hole', 0.9, 2), "jag": hp.uniform('jag', 0, 0.05)},
+#             algo=tpe.suggest,
+#             max_evals=10000,
+#             trials=trials)
 
-print(best)
+print(trials.trials)
+
+# print(best)

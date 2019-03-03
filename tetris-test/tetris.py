@@ -9,14 +9,17 @@ if MULTIPROCESSESED:
 
 pool = None
 
-HOLE_WEIGHT = 1.034
-JAGGED_WEIGHT = 0.008
+# HOLE_WEIGHT = 1.034
+# JAGGED_WEIGHT = 0.008
+
+HOLE_WEIGHT = 1.1741144934787453
+JAGGED_WEIGHT = 0.04604025903232776
 
 HEIGHT_POWER = 1.0
 HOLE_POWER = 1.0
 JAGGED_POWER = 1.0
 
-RECURSION_DEPTH = 0
+RECURSION_DEPTH = 3
 
 WELL_HEIGHT = 25
 WELL_WIDTH = 10
@@ -97,6 +100,31 @@ def print_well(well):
 	print(" " + "=" * len(well[0]) * 2)
 	print("|" + "|\n|".join("".join(block_chars[b] for b in row) for row in well) + "|")
 	print(" " + "=" * len(well[0]) * 2)
+
+
+class Well(object):
+	def __init__(self, columns, rows):
+		self.columns = columns
+		self.rows = rows
+
+	def clear_row(self, row):
+		del self.rows[row]
+		self.rows.insert(0, 0)
+
+		for column in self.columns:
+			pass
+
+	def do_a_tetris_move(self, block, xoffset):
+		pass
+
+	def get_fitness(self):
+		pass
+
+	def calculate_fitness(self):
+		pass
+
+	def is_alive(self):
+		pass
 
 
 class GameState(object):
@@ -224,7 +252,12 @@ class GameState(object):
 			block = self.next_up[0]
 			for rotation in block.rotations:
 				block_width = len(rotation[0])
-				for offset in range(WELL_WIDTH - block_width + 1):
+				max_offset = WELL_WIDTH - block_width + 1
+				# if block is iBlock:
+				# 	max_offset = WELL_WIDTH - block_width + 1
+				# else:
+				# 	max_offset = WELL_WIDTH - block_width
+				for offset in range(max_offset):
 					future_well = self.do_a_tetris_move(rotation, offset)
 					self.possible_futures.append(GameState(future_well, self.hold, self.next_up[1:]))
 			if not self.was_held:
@@ -239,6 +272,8 @@ class GameState(object):
 			max_index = future_fitnesses.index(min(future_fitnesses))
 			return self.possible_futures[max_index]
 		elif recurse:
+			self.possible_futures.sort(key=lambda future: future.get_fitness())
+			self.possible_futures = self.possible_futures[:5]
 			return min(self.possible_futures, key=lambda future: future.find_max_fitness(recurse - 1).get_fitness())
 		else:
 			return min(self.possible_futures, key=lambda future: future.get_fitness())
@@ -274,7 +309,7 @@ def main():
 			state = best_future
 
 			block_count += 1
-			if block_count % 1000 == 0:
+			if block_count % 100 == 0:
 				print("block count:", block_count)
 				print("time:", time.time() - last_time)
 				last_time = time.time()
