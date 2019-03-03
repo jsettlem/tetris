@@ -19,7 +19,7 @@ HEIGHT_POWER = 1.0
 HOLE_POWER = 1.0
 JAGGED_POWER = 1.0
 
-RECURSION_DEPTH = 3
+RECURSION_DEPTH = 2
 
 WELL_HEIGHT = 25
 WELL_WIDTH = 10
@@ -92,8 +92,9 @@ oBlock = Block([
 	[7, 7]
 ], (0,))
 
-blocks = [iBlock, jBlock, lBlock, zBlock, sBlock, tBlock, oBlock]
-random.shuffle(blocks)
+blocks = [tBlock, zBlock, lBlock, iBlock, sBlock, oBlock,  jBlock]
+bag = blocks[:]
+random.shuffle(bag)
 
 
 def print_well(well):
@@ -102,39 +103,14 @@ def print_well(well):
 	print(" " + "=" * len(well[0]) * 2)
 
 
-class Well(object):
-	def __init__(self, columns, rows):
-		self.columns = columns
-		self.rows = rows
-
-	def clear_row(self, row):
-		del self.rows[row]
-		self.rows.insert(0, 0)
-
-		for column in self.columns:
-			pass
-
-	def do_a_tetris_move(self, block, xoffset):
-		pass
-
-	def get_fitness(self):
-		pass
-
-	def calculate_fitness(self):
-		pass
-
-	def is_alive(self):
-		pass
-
-
 class GameState(object):
 	def __init__(self, well, hold, next_up, was_held=False):
 		self.well = well
 		self.hold = hold
 		self.next_up = next_up
 		self.was_held = was_held
-		if len(self.next_up) < len(blocks):
-			self.next_up += blocks
+		if len(self.next_up) < len(bag):
+			self.next_up += bag
 			self.was_shuffled = True
 		else:
 			self.was_shuffled = False
@@ -260,12 +236,12 @@ class GameState(object):
 				for offset in range(max_offset):
 					future_well = self.do_a_tetris_move(rotation, offset)
 					self.possible_futures.append(GameState(future_well, self.hold, self.next_up[1:]))
-			if not self.was_held:
-				if self.hold is None:
-					self.possible_futures.append(GameState(self.well, block, self.next_up[1:], was_held=True))
-				else:
-					self.possible_futures.append(
-						GameState(self.well, block, [self.hold] + self.next_up[1:], was_held=True))
+			# if not self.was_held:
+			# 	if self.hold is None:
+			# 		self.possible_futures.append(GameState(self.well, block, self.next_up[1:], was_held=True))
+			# 	else:
+			# 		self.possible_futures.append(
+			# 			GameState(self.well, block, [self.hold] + self.next_up[1:], was_held=True))
 		if MULTIPROCESSESED and recurse == RECURSION_DEPTH:
 			future_fitnesses = pool.map(lambda future: future.find_max_fitness(recurse - 1).get_fitness(),
 			                            self.possible_futures)
@@ -286,13 +262,13 @@ def main():
 	for _ in range(100):
 		well = [[0] * WELL_WIDTH] * WELL_HEIGHT
 		hold = None
-		next_up = blocks[:]
+		next_up = bag[:]
 		state = GameState(well, hold, next_up)
 		block_count = 0
 		while state.alive:
 			best_future = state.find_max_fitness()
 			if best_future.was_shuffled:
-				random.shuffle(blocks)
+				random.shuffle(bag)
 
 			# print("next up:")
 			# for next in state.next_up[1:4]:
