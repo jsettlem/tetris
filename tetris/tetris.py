@@ -29,20 +29,28 @@ block_chars = ['\x1b[%sm  \x1b[0m' % ';'.join(["1", "30", str(bg)]) for bg in ra
 fitness_cache = {}
 well_cache = {}
 
+class Rotation(object):
+	def __init__(self, grid, parent, rotation, initial_offset):
+		self.grid = grid
+		self.parent = parent
+		self.rotation = rotation
+		self.offset = initial_offset
 
 class Block(object):
 	def __init__(self, grid, rotations):
 		self.grid = grid
 		self.rotations = []
-		for rotation in rotations:
+		for rotation, offset in rotations:
 			if rotation == 1:
-				self.rotations.append(self.rotate_right(self.grid))
+				new_grid = self.rotate_right(self.grid)
 			elif rotation == 2:
-				self.rotations.append(self.rotate_right(self.rotate_right(self.grid)))
+				new_grid = self.rotate_right(self.rotate_right(self.grid))
 			elif rotation == -1:
-				self.rotations.append(self.rotate_left(self.grid))
+				new_grid = self.rotate_left(self.grid)
 			else:
-				self.rotations.append(self.grid)
+				new_grid = self.grid
+
+			self.rotations.append(Rotation(new_grid, self, rotation, offset))
 
 	@staticmethod
 	def rotate_right(grid):
@@ -54,43 +62,38 @@ class Block(object):
 
 
 iBlock = Block([
-	[1],
-	[1],
-	[1],
-	[1]
-], (0, 1))
+	[1, 1, 1, 1]
+], ((0, 3), (1, 5)))
 
 jBlock = Block([
-	[0, 2],
-	[0, 2],
-	[2, 2]
-], (0, 1, 2, -1))
+	[2, 0, 0],
+	[2, 2, 2],
+], ((0, 3), (1, 4), (2, 3), (-1, 3)))
 
 lBlock = Block([
-	[3, 0],
-	[3, 0],
-	[3, 3]
-], (0, 1, 2, -1))
+	[0, 0, 3],
+	[3, 3, 3]
+], ((0, 3), (1, 4), (2, 3), (-1, 3)))
 
 zBlock = Block([
 	[4, 4, 0],
 	[0, 4, 4]
-], (0, 1))
+], ((0, 3), (1, 4)))
 
 sBlock = Block([
 	[0, 5, 5],
 	[5, 5, 0]
-], (0, 1))
+], ((0, 3), (1, 4)))
 
 tBlock = Block([
 	[0, 6, 0],
 	[6, 6, 6]
-], (0, 1, 2, -1))
+], ((0, 3), (1, 4), (2, 3), (-1, 3)))
 
 oBlock = Block([
 	[7, 7],
 	[7, 7]
-], (0,))
+], ((0, 4),))
 
 blocks = [tBlock, zBlock, lBlock, iBlock, sBlock, oBlock,  jBlock]
 bag = blocks[:]
@@ -104,7 +107,7 @@ def print_well(well):
 
 
 class GameState(object):
-	def __init__(self, well, hold, next_up, was_held=False):
+	def __init__(self, well, hold, next_up, was_held=False, rotation=None, offset=None):
 		self.well = well
 		self.hold = hold
 		self.next_up = next_up
@@ -117,6 +120,8 @@ class GameState(object):
 		self.possible_futures = None
 		self.fitness = None
 		self.alive = self.is_alive()
+		self.rotation = rotation
+		self.offset = offset
 
 	def get_fitness(self):
 		if self.fitness is None:
@@ -227,15 +232,15 @@ class GameState(object):
 			self.possible_futures = []
 			block = self.next_up[0]
 			for rotation in block.rotations:
-				block_width = len(rotation[0])
+				block_width = len(rotation.grid[0])
 				max_offset = WELL_WIDTH - block_width + 1
 				# if block is iBlock:
 				# 	max_offset = WELL_WIDTH - block_width + 1
 				# else:
 				# 	max_offset = WELL_WIDTH - block_width
 				for offset in range(max_offset):
-					future_well = self.do_a_tetris_move(rotation, offset)
-					self.possible_futures.append(GameState(future_well, self.hold, self.next_up[1:]))
+					future_well = self.do_a_tetris_move(rotation.grid, offset)
+					self.possible_futures.append(GameState(future_well, self.hold, self.next_up[1:], rotation=rotation, offset=offset))
 			# if not self.was_held:
 			# 	if self.hold is None:
 			# 		self.possible_futures.append(GameState(self.well, block, self.next_up[1:], was_held=True))
