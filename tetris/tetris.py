@@ -9,9 +9,6 @@ if MULTIPROCESSESED:
 
 pool = None
 
-# HOLE_WEIGHT = 1.034
-# JAGGED_WEIGHT = 0.008
-
 HOLE_WEIGHT = 1.1741144934787453
 JAGGED_WEIGHT = 0.04604025903232776
 
@@ -19,7 +16,7 @@ HEIGHT_POWER = 1.0
 HOLE_POWER = 1.0
 JAGGED_POWER = 1.0
 
-RECURSION_DEPTH = 2
+RECURSION_DEPTH = 3
 
 WELL_HEIGHT = 25
 WELL_WIDTH = 10
@@ -107,11 +104,12 @@ def print_well(well):
 
 
 class GameState(object):
-	def __init__(self, well, hold, next_up, was_held=False, rotation=None, offset=None):
+	def __init__(self, well, hold, next_up, was_held=False, was_first_hold=False, rotation=None, offset=None):
 		self.well = well
 		self.hold = hold
 		self.next_up = next_up
 		self.was_held = was_held
+		self.was_first_hold = was_first_hold
 		if len(self.next_up) < len(bag):
 			self.next_up += bag
 			self.was_shuffled = True
@@ -122,6 +120,7 @@ class GameState(object):
 		self.alive = self.is_alive()
 		self.rotation = rotation
 		self.offset = offset
+
 
 	def get_fitness(self):
 		if self.fitness is None:
@@ -158,6 +157,10 @@ class GameState(object):
 		for cell in self.well[0]:
 			if cell:
 				return False
+		# last_column = len(self.well[0]) - 1
+		# for y in range(len(self.well)):
+		# 	if self.well[y][last_column]:
+		# 		return False
 		return True
 
 	def do_a_tetris_move(self, block, x_offset):
@@ -241,12 +244,12 @@ class GameState(object):
 				for offset in range(max_offset):
 					future_well = self.do_a_tetris_move(rotation.grid, offset)
 					self.possible_futures.append(GameState(future_well, self.hold, self.next_up[1:], rotation=rotation, offset=offset))
-			# if not self.was_held:
-			# 	if self.hold is None:
-			# 		self.possible_futures.append(GameState(self.well, block, self.next_up[1:], was_held=True))
-			# 	else:
-			# 		self.possible_futures.append(
-			# 			GameState(self.well, block, [self.hold] + self.next_up[1:], was_held=True))
+			if not self.was_held:
+				if self.hold is None:
+					self.possible_futures.append(GameState(self.well, block, self.next_up[1:], was_held=True, was_first_hold=True))
+				else:
+					self.possible_futures.append(
+						GameState(self.well, block, [self.hold] + self.next_up[1:], was_held=True))
 		if MULTIPROCESSESED and recurse == RECURSION_DEPTH:
 			future_fitnesses = pool.map(lambda future: future.find_max_fitness(recurse - 1).get_fitness(),
 			                            self.possible_futures)
