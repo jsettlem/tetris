@@ -1,16 +1,22 @@
+import itertools
 import random
 import sys
 import time
 
 MULTIPROCESSESED = False
+GO_FOR_TETRISES = True
 
 if MULTIPROCESSESED:
 	import pathos.pools as pp
 
 pool = None
 
-HOLE_WEIGHT = 1.1741144934787453
-JAGGED_WEIGHT = 0.04604025903232776
+if GO_FOR_TETRISES:
+	HOLE_WEIGHT = 1.1741144934787453 * 2
+	JAGGED_WEIGHT = 0.04604025903232776 * 2
+else:
+	HOLE_WEIGHT = 1.1741144934787453
+	JAGGED_WEIGHT = 0.04604025903232776
 
 HEIGHT_POWER = 1.0
 HOLE_POWER = 1.0
@@ -18,7 +24,7 @@ JAGGED_POWER = 1.0
 
 RECURSION_DEPTH = 3
 
-WELL_HEIGHT = 25
+WELL_HEIGHT = 20
 WELL_WIDTH = 10
 
 block_chars = ['\x1b[%sm  \x1b[0m' % ';'.join(["1", "30", str(bg)]) for bg in range(40, 48)]
@@ -58,9 +64,14 @@ class Block(object):
 		return list(zip(*grid))[::-1]
 
 
-iBlock = Block([
-	[1, 1, 1, 1]
-], ((0, 3), (1, 5)))
+if GO_FOR_TETRISES:
+	iBlock = Block([
+		[1, 1, 1, 1]
+	], ((1, 5),))
+else:
+	iBlock = Block([
+		[1, 1, 1, 1]
+	], ((0, 3), (1, 5)))
 
 jBlock = Block([
 	[2, 0, 0],
@@ -120,7 +131,18 @@ class GameState(object):
 		self.alive = self.is_alive()
 		self.rotation = rotation
 		self.offset = offset
+		self.column_heights = self.find_highest_rows()
 
+	def find_highest_rows(self):
+		column_heights = [0] * WELL_WIDTH
+		for x in range(WELL_WIDTH):
+			current_well_row = 0
+			while current_well_row < WELL_HEIGHT and not self.well[current_well_row][x]:
+				current_well_row += 1
+
+			column_heights[x] = WELL_HEIGHT - current_well_row
+
+		return column_heights
 
 	def get_fitness(self):
 		if self.fitness is None:
@@ -138,9 +160,9 @@ class GameState(object):
 		well_width = len(self.well[0])
 		last_height = None
 		for column in range(well_width):
-			y = 0
-			while y < well_height and self.well[y][column] == 0:
-				y += 1
+			y = WELL_HEIGHT - self.column_heights[column]
+			# while y < well_height and self.well[y][column] == 0:
+			# 	y += 1
 			if last_height is not None:
 				jagged_fitness += abs(y - last_height)
 			last_height = y
@@ -157,9 +179,9 @@ class GameState(object):
 		for cell in self.well[0]:
 			if cell:
 				return False
-		# last_column = len(self.well[0]) - 1
+		# bad_column = 2
 		# for y in range(len(self.well)):
-		# 	if self.well[y][last_column]:
+		# 	if self.well[y][bad_column]:
 		# 		return False
 		return True
 
@@ -176,10 +198,12 @@ class GameState(object):
 				while not block[current_block_row][x]:
 					current_block_row -= 1
 
-				current_well_row = 0
+				# current_well_row = 0
 				well_x = x + x_offset
-				while current_well_row < well_height and not self.well[current_well_row][well_x]:
-					current_well_row += 1
+				# while current_well_row < well_height and not self.well[current_well_row][well_x]:
+				# 	current_well_row += 1
+
+				current_well_row = WELL_HEIGHT - self.column_heights[well_x]
 
 				if current_well_row - current_block_row - 1 < highest_well_row:
 					highest_well_row = current_well_row - current_block_row - 1
@@ -237,11 +261,10 @@ class GameState(object):
 			for rotation in block.rotations:
 				block_width = len(rotation.grid[0])
 				max_offset = WELL_WIDTH - block_width + 1
-				# if block is iBlock:
-				# 	max_offset = WELL_WIDTH - block_width + 1
-				# else:
-				# 	max_offset = WELL_WIDTH - block_width
-				for offset in range(max_offset):
+				valid_offsets = range(max_offset)
+				if GO_FOR_TETRISES and (block is not iBlock or not all(height >= 4 for height in self.column_heights[:-1])):
+					valid_offsets = range(max_offset - 1)
+				for offset in valid_offsets:
 					future_well = self.do_a_tetris_move(rotation.grid, offset)
 					self.possible_futures.append(GameState(future_well, self.hold, self.next_up[1:], rotation=rotation, offset=offset))
 			if not self.was_held:
@@ -278,22 +301,22 @@ def main():
 			if best_future.was_shuffled:
 				random.shuffle(bag)
 
-			# print("next up:")
-			# for next in state.next_up[1:4]:
-			# 	print_well(next.grid)
-			# if best_future.hold is not None:
-			# 	print("hold:")
-			# 	print_well(best_future.hold.grid)
-			# print_well(best_future.well)
-			# print("best future", best_future.get_fitness())
-			#
-			# print(block_count)
-			# time.sleep(0.25)
+			print("next up:")
+			for next in state.next_up[1:4]:
+				print_well(next.grid)
+			if best_future.hold is not None:
+				print("hold:")
+				print_well(best_future.hold.grid)
+			print_well(best_future.well)
+			print("best future", best_future.get_fitness())
+
+			print(block_count)
+			time.sleep(0.25)
 
 			state = best_future
 
 			block_count += 1
-			if block_count % 100 == 0:
+			if block_count % 1000 == 0:
 				print("block count:", block_count)
 				print("time:", time.time() - last_time)
 				last_time = time.time()
