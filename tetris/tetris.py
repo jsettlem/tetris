@@ -1,10 +1,9 @@
-import itertools
 import random
 import sys
 import time
 
 MULTIPROCESSESED = False
-GO_FOR_TETRISES = True
+GO_FOR_TETRISES = False
 
 if MULTIPROCESSESED:
 	import pathos.pools as pp
@@ -12,8 +11,8 @@ if MULTIPROCESSESED:
 pool = None
 
 if GO_FOR_TETRISES:
-	HOLE_WEIGHT = 1.1741144934787453 * 2
-	JAGGED_WEIGHT = 0.04604025903232776 * 2
+	HOLE_WEIGHT = 20
+	JAGGED_WEIGHT = 0.1
 else:
 	HOLE_WEIGHT = 1.1741144934787453
 	JAGGED_WEIGHT = 0.04604025903232776
@@ -164,7 +163,12 @@ class GameState(object):
 			# while y < well_height and self.well[y][column] == 0:
 			# 	y += 1
 			if last_height is not None:
-				jagged_fitness += abs(y - last_height)
+				line_difference = abs(y - last_height)
+				if not GO_FOR_TETRISES:
+					jagged_fitness += line_difference
+				else:
+					if line_difference >= 3:
+						jagged_fitness += 10
 			last_height = y
 			if well_height - y > row_fitness:
 				row_fitness = well_height - y

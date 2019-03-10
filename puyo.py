@@ -1,4 +1,3 @@
-import os
 import threading
 
 import numpy as np
@@ -18,6 +17,10 @@ NEXT_UP_Y_GAP = 67
 A_BUTTON = 0b00010000
 B_BUTTON = 0b10000000
 L_BUTTON = 0b00001000
+HAT_TOP = 0b01000000
+HAT_LEFT = 0b00000100
+HAT_RIGHT = 0b00000010
+
 xp = 0
 yp = 0
 to_press = 0
@@ -75,27 +78,27 @@ def main():
 				block_index = block_hues.index(min(block_hues, key=lambda b: abs(b - average_hue)))
 				next_ups.append(block_names[block_index])
 				average_hues.append(average_hue)
-			# print(np.round(average_hues))
-			if w == ord('a'):
-				xp = -127
-			elif w == ord('d'):
-				xp = 127
-			else:
-				xp = 0
+			if not going:
+				if w == ord('a'):
+					xp = -127
+				elif w == ord('d'):
+					xp = 127
+				else:
+					xp = 0
 
-			if w == ord('w'):
-				yp = -127
-			elif w == ord('s'):
-				yp = 127
-			else:
-				yp = 0
+				if w == ord('w'):
+					yp = -127
+				elif w == ord('s'):
+					yp = 127
+				else:
+					yp = 0
 
-			if w == ord(' '):
-				to_press = A_BUTTON
-			elif w == ord('z'):
-				to_press = B_BUTTON
-			else:
-				to_press = 0
+				if w == ord(' '):
+					to_press = A_BUTTON
+				elif w == ord('z'):
+					to_press = B_BUTTON
+				else:
+					to_press = 0
 
 			if w == ord('q'):
 				break
@@ -116,14 +119,14 @@ def main():
 						print("The game has started")
 						fsm_state = "BLOCK_PLACED"
 				elif fsm_state == "PLACING_BLOCK":
-					if last_up[:3] != next_ups[:3]:
+					if last_up[:3] != next_ups[:3] and not hard_droppin:
 						fsm_state = "BLOCK_PLACED"
 				if fsm_state == "BLOCK_PLACED":
 					print("the block has been placeD!")
 					next_up = [blocks[block_names.index(block)] for block in next_ups]
 					if state.was_first_hold or not state.was_held:
 						state.next_up = [last_block] + next_up
-					best_future = state.find_max_fitness(recurse=2)
+					best_future = state.find_max_fitness(recurse=1)
 					if best_future.was_held:
 						to_hold = True
 					else:
@@ -134,7 +137,7 @@ def main():
 						print_well(best_future.rotation.grid)
 						print("rotation:", best_future.rotation.rotation, "offset:", best_future.offset)
 					last_block = next_up[0]
-					print ("next up:")
+					print("next up:")
 					for next in best_future.next_up[:3]:
 						print_well(next.grid)
 					if best_future.hold:
@@ -150,12 +153,7 @@ def main():
 					if state.was_first_hold or not state.was_held:
 						fsm_state = "PLACING_BLOCK"
 
-
-			if next_ups[:3] != last_up[:3]:
-				# print(next_ups)
-				last_up = next_ups[:]
 			last_up = next_ups[:]
-
 
 	finally:
 		cap.release()
@@ -170,55 +168,48 @@ def serial_loop():
 	global hard_droppin
 	global to_hold
 	ser = serial.Serial("COM6", 57600, writeTimeout=0)
+
+	def write_to_serial(data_array):
+		ser.write(bytearray(data_array))
+		ser.read()
+
 	try:
 		while True:
 			if not going:
-				ser.write(bytearray([xp + 128, yp + 128, 128, 128, to_press]))
-				ser.read()
+				write_to_serial([xp + 128, yp + 128, 2, to_press])
 			else:
-				# if to_direct != 0 or to_rotate != 0:
-				# 	print(to_direct, to_rotate)
+				xp = 0
+				# print(to_direct, to_rotate, to_hold)
 				if to_hold:
 					to_press = L_BUTTON
 					to_hold = False
 				else:
+					to_press = 0
+					xp = 0
 					if to_direct > 0:
-						xp = 127
+						to_press = HAT_RIGHT
 						to_direct -= 1
 					elif to_direct < 0:
-						xp = -128
+						to_press = HAT_LEFT
 						to_direct += 1
-					else:
-						xp = 0
 
 					if to_rotate > 0:
-						to_press = A_BUTTON
+						to_press |= A_BUTTON
 						to_rotate -= 1
 					elif to_rotate < 0:
-						to_press = B_BUTTON
+						to_press |= B_BUTTON
 						to_rotate += 1
-					else:
-						to_press = 0
 
-				if to_press != 0 or xp != 0:
-					ser.write(bytearray([xp + 128, yp + 128, 128, 128, to_press]))
-					ser.read()
-					time.sleep(1/45)
+				if to_press != 0:
+					write_to_serial([128, 128, 2, to_press])
+					write_to_serial([128, 128, 2, 0])
 
-					ser.write(bytearray([128, 128, 128, 128, 0]))
-					ser.read()
-					time.sleep(1/45)
 				elif hard_droppin:
-					hard_droppin = False
-					ser.write(bytearray([128, 0, 128, 128, 0]))
-					ser.read()
-					time.sleep(1/45)
-					ser.write(bytearray([128, 128, 128, 128, 0]))
-					ser.read()
-				else:
-					ser.write(bytearray([128, 128, 128, 128, 0]))
-					ser.read()
+					write_to_serial([128, 0, 2, 0])
 
+					hard_droppin = False
+				else:
+					write_to_serial([128, 128, 0, 0])
 
 	finally:
 		print("the end")
